@@ -1,5 +1,6 @@
 package com.example.tradingview
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,18 +9,16 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONException
-import org.json.JSONObject
 import java.util.Locale
+
 
 class MainActivity : ComponentActivity() {
     private var currencyRV: RecyclerView? = null
@@ -36,8 +35,16 @@ class MainActivity : ComponentActivity() {
         loadingPB = findViewById(R.id.idPBLoading)
         currencyRV = findViewById(R.id.idRVcurrency)
         currencyModalArrayList = ArrayList()
-        currencyRVAdapter = CurrencyRVAdapter(currencyModalArrayList!!, this)
-
+//        currencyRVAdapter = CurrencyRVAdapter(currencyModalArrayList!!, this)
+        currencyRVAdapter = CurrencyRVAdapter(
+            currencyModalArrayList, this
+        ) { position -> // Handle the click event here
+            // Example: Open a new activity
+            val intent = Intent(this@MainActivity, GraphViewer::class.java)
+            // Optionally pass data to the new activity
+            intent.putExtra("currency_name", currencyModalArrayList!![position].name)
+            startActivity(intent)
+        }
         currencyRV?.layoutManager = LinearLayoutManager(this)
         currencyRV?.adapter = currencyRVAdapter
 
@@ -51,6 +58,8 @@ class MainActivity : ComponentActivity() {
             }
         })
     }
+
+
 
     private fun filter(text: String) {
         val filteredList = ArrayList<CurrencyModal>()
@@ -67,6 +76,7 @@ class MainActivity : ComponentActivity() {
 
     private fun getData() {
         val url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
+
         val queue: RequestQueue = Volley.newRequestQueue(this)
 
         val jsonObjectRequest = object : JsonObjectRequest(Request.Method.GET, url, null,
@@ -74,14 +84,18 @@ class MainActivity : ComponentActivity() {
                 loadingPB?.visibility = View.GONE
                 try {
                     val dataArray = response.getJSONArray("data")
+//                    val filteredSymbols = listOf("BTC", "ETH", "XRP", "SOL")
                     for (i in 0 until dataArray.length()) {
                         val dataObj = dataArray.getJSONObject(i)
                         val symbol = dataObj.getString("symbol")
-                        val name = dataObj.getString("name")
-                        val quote = dataObj.getJSONObject("quote")
-                        val USD = quote.getJSONObject("USD")
-                        val price = USD.getDouble("price")
-                        currencyModalArrayList?.add(CurrencyModal(name, symbol, price))
+//                        if (symbol in filteredSymbols) { // Check if the symbol is one of the filtered ones
+                            val name = dataObj.getString("name")
+                            val quote = dataObj.getJSONObject("quote")
+                            val USD = quote.getJSONObject("USD")
+                            val price = USD.getDouble("price")
+                            val percent_change_24h = USD.getDouble("percent_change_24h") // Get the volume change
+                            currencyModalArrayList?.add(CurrencyModal(name, symbol, price, percent_change_24h)) // Pass it to the constructor
+//                        }
                     }
                     currencyRVAdapter?.notifyDataSetChanged()
                 } catch (e: JSONException) {
@@ -94,7 +108,7 @@ class MainActivity : ComponentActivity() {
             }) {
             override fun getHeaders(): Map<String, String> {
                 val headers = HashMap<String, String>()
-                headers["X-CMC_PRO_API_KEY"] = "335008f7-957b-4453-9595-1cbfdf377afd"
+                headers["X-CMC_PRO_API_KEY"] = "335008f7-957b-4453-9595-1cbfdf377afd" // Make sure to use your actual API key
                 return headers
             }
         }

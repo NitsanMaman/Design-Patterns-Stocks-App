@@ -15,6 +15,11 @@
         android:theme="@style/Theme.TradingView"
         tools:targetApi="31">
         <activity
+            android:name=".GraphViewer"
+            android:exported="false"
+            android:label="@string/title_activity_graph_viewer"
+            android:theme="@style/Theme.TradingView" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

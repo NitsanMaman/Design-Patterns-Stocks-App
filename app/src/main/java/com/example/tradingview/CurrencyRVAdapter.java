@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DecimalFormat;
@@ -20,9 +21,16 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
     private ArrayList<CurrencyModal> currencyModals;
     private Context context;
 
-    public CurrencyRVAdapter(ArrayList<CurrencyModal> currencyModals, Context context) {
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+
+    public CurrencyRVAdapter(ArrayList<CurrencyModal> currencyModals, Context context, OnItemClickListener listener) {
         this.currencyModals = currencyModals;
         this.context = context;
+        this.listener = listener;
     }
 
     // below is the method to filter our list.
@@ -40,7 +48,7 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
         // which we have created for our recycler view.
         // on below line we are inflating our layout file.
         View view = LayoutInflater.from(context).inflate(R.layout.currency_rv_item, parent, false);
-        return new CurrencyRVAdapter.CurrencyViewholder(view);
+        return new CurrencyViewholder(view);
     }
 
     @Override
@@ -51,6 +59,11 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
         holder.nameTV.setText(modal.getName());
         holder.rateTV.setText("$ " + df2.format(modal.getPrice()));
         holder.symbolTV.setText(modal.getSymbol());
+
+        holder.percentageTV.setTextColor(modal.getPercent_change_24h() < 0 ?
+                ContextCompat.getColor(holder.itemView.getContext(), R.color.red) :
+                ContextCompat.getColor(holder.itemView.getContext(), R.color.green));
+        holder.percentageTV.setText((modal.getPercent_change_24h_str() + "%").replace('-', ' '));
     }
 
     @Override
@@ -63,15 +76,23 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
     // on below line we are creating our view holder class
     // which will be used to initialize each view of our layout file.
     public class CurrencyViewholder extends RecyclerView.ViewHolder {
-        private TextView symbolTV, rateTV, nameTV;
+        private TextView symbolTV, rateTV, nameTV, percentageTV;
 
         public CurrencyViewholder(@NonNull View itemView) {
             super(itemView);
-            // on below line we are initializing all
-            // our text views along with  its ids.
             symbolTV = itemView.findViewById(R.id.idTVSymbol);
             rateTV = itemView.findViewById(R.id.idTVRate);
             nameTV = itemView.findViewById(R.id.idTVName);
+            percentageTV = itemView.findViewById(R.id.idTVPercentage);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(listener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
+                        listener.onItemClick(getAdapterPosition());
+                    }
+                }
+            });
         }
     }
 }
