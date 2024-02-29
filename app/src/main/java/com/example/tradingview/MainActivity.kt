@@ -43,16 +43,14 @@ class MainActivity : ComponentActivity() {
         loadingPB = findViewById(R.id.idPBLoading)
         currencyRV = findViewById(R.id.idRVcurrency)
         currencyModalArrayList = ArrayList()
-        currencyRVAdapter = CurrencyRVAdapter(
-            currencyModalArrayList, this
-        ) { position ->
-            val intent = Intent(this@MainActivity, StocksList::class.java)
-            // Optionally pass data to the new activity
-            intent.putExtra("currency_name", currencyModalArrayList!![position].name)
-            startActivity(intent)
-        }
-        currencyRV?.layoutManager = LinearLayoutManager(this)
-        currencyRV?.adapter = currencyRVAdapter
+        currencyRVAdapter = CurrencyRVAdapter(this, currencyModalArrayList, object : CurrencyRVAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                // Intent to start your GraphViewerActivity
+                val intent = Intent(this@MainActivity, MainActivity::class.java)
+                startActivity(intent)
+            }
+        })
+
 
 //        populateList()
 
@@ -66,16 +64,30 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun filter(text: String) {
-        val filteredList = ArrayList<CurrencyModal>()
-        currencyModalArrayList?.filterTo(filteredList) {
-            it.name.lowercase(Locale.getDefault()).contains(text.lowercase(Locale.getDefault()))
+        val searchTextLowercase = text.lowercase(Locale.getDefault())
+        val exactMatches = ArrayList<CurrencyModal>()
+        val partialMatches = ArrayList<CurrencyModal>()
+
+        currencyModalArrayList?.forEach {
+            when {
+                // Check for exact match in symbol
+                it.symbol.lowercase(Locale.getDefault()) == searchTextLowercase -> exactMatches.add(it)
+                // Check for exact match in name
+                it.name.lowercase(Locale.getDefault()) == searchTextLowercase -> exactMatches.add(it)
+                // Check for partial match in symbol or name
+                it.symbol.lowercase(Locale.getDefault()).contains(searchTextLowercase) ||
+                        it.name.lowercase(Locale.getDefault()).contains(searchTextLowercase) -> partialMatches.add(it)
+            }
+        }
+        val filteredList = ArrayList<CurrencyModal>().apply {
+            addAll(exactMatches)
+            addAll(partialMatches)
         }
 
-        if (filteredList.isEmpty()) {
-            Toast.makeText(this, "No currency found..", Toast.LENGTH_SHORT).show()
-        } else {
+        if (filteredList.isEmpty())
+            Toast.makeText(this, "No currency found.", Toast.LENGTH_SHORT).show()
+        else
             currencyRVAdapter?.filterList(filteredList)
-        }
     }
 
     private fun populateList() {
@@ -102,7 +114,6 @@ class MainActivity : ComponentActivity() {
         })
     }
 }
-
 
 
 //    private fun getData() {

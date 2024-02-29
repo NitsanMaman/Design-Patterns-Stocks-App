@@ -33,7 +33,7 @@ class StocksList : ComponentActivity() {
         loadingPB = findViewById(R.id.idPBLoading)
         currencyRV = findViewById(R.id.idRVcurrency)
         currencyModalArrayList = ArrayList()
-        currencyRVAdapter = CurrencyRVAdapter(currencyModalArrayList, this, object : CurrencyRVAdapter.OnItemClickListener {
+        currencyRVAdapter = CurrencyRVAdapter(this, currencyModalArrayList, object : CurrencyRVAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 val symbol = currencyModalArrayList!![position].symbol
                 // Assuming FileManager has been correctly instantiated and set up for Kotlin usage
@@ -55,19 +55,37 @@ class StocksList : ComponentActivity() {
         })
     }
 
+private fun filter(text: String) {
+    val searchTextLowercase = text.lowercase(Locale.getDefault())
+    // Separate lists for exact matches and partial matches
+    val exactMatches = ArrayList<CurrencyModal>()
+    val partialMatches = ArrayList<CurrencyModal>()
 
-    private fun filter(text: String) {
-        val filteredList = ArrayList<CurrencyModal>()
-        currencyModalArrayList?.filterTo(filteredList) {
-            it.name.lowercase(Locale.getDefault()).contains(text.lowercase(Locale.getDefault()))
-        }
-
-        if (filteredList.isEmpty()) {
-            Toast.makeText(this, "No currency found..", Toast.LENGTH_SHORT).show()
-        } else {
-            currencyRVAdapter?.filterList(filteredList)
+    currencyModalArrayList?.forEach {
+        when {
+            // Check for exact match in symbol
+            it.symbol.lowercase(Locale.getDefault()) == searchTextLowercase -> exactMatches.add(it)
+            // Check for exact match in name
+            it.name.lowercase(Locale.getDefault()) == searchTextLowercase -> exactMatches.add(it)
+            // Check for partial match in symbol or name
+            it.symbol.lowercase(Locale.getDefault()).contains(searchTextLowercase) ||
+                    it.name.lowercase(Locale.getDefault()).contains(searchTextLowercase) -> partialMatches.add(it)
         }
     }
+
+    val filteredList = ArrayList<CurrencyModal>().apply {
+        // Add exact matches first
+        addAll(exactMatches)
+        // Then add partial matches
+        addAll(partialMatches)
+    }
+
+    if (filteredList.isEmpty())
+        Toast.makeText(this, "No currency found.", Toast.LENGTH_SHORT).show()
+    else
+        currencyRVAdapter?.filterList(filteredList)
+}
+
 
     //    private fun getData() {
 //        val url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"

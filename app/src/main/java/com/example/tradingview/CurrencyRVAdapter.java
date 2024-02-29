@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.CurrencyViewholder> {
     private static DecimalFormat df2 = new DecimalFormat("#.##");
     private ArrayList<CurrencyModal> currencyModals;
+    private ArrayList<CurrencyModal> currencyModalsFull;
     private Context context;
 
     private OnItemClickListener listener;
@@ -27,18 +28,17 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
         void onItemClick(int position);
     }
 
-    public CurrencyRVAdapter(ArrayList<CurrencyModal> currencyModals, Context context, OnItemClickListener listener) {
-        this.currencyModals = currencyModals;
+    public CurrencyRVAdapter(Context context, ArrayList<CurrencyModal> currencyModals, OnItemClickListener listener) {
         this.context = context;
+        this.currencyModals = currencyModals;
+        this.currencyModalsFull = new ArrayList<>(currencyModals);
         this.listener = listener;
     }
 
-    // below is the method to filter our list.
+
     public void filterList(ArrayList<CurrencyModal> filterlist) {
-        // adding filtered list to our
-        // array list and notifying data set changed
         currencyModals = filterlist;
-        notifyDataSetChanged();
+        refresh();
     }
 
     public void refresh() {
