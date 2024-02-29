@@ -41,6 +41,10 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
         notifyDataSetChanged();
     }
 
+    public void refresh() {
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public CurrencyRVAdapter.CurrencyViewholder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -57,13 +61,14 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
         // recycler view and all its views.
         CurrencyModal modal = currencyModals.get(position);
         holder.nameTV.setText(modal.getName());
-        holder.rateTV.setText("$ " + df2.format(modal.getPrice()));
+        holder.rateTV.setText(modal.getPrice() == -1.0 ? " " : "$ " + df2.format(modal.getPrice()));
         holder.symbolTV.setText(modal.getSymbol());
 
         holder.percentageTV.setTextColor(modal.getPercent_change_24h() < 0 ?
                 ContextCompat.getColor(holder.itemView.getContext(), R.color.red) :
                 ContextCompat.getColor(holder.itemView.getContext(), R.color.green));
-        holder.percentageTV.setText((modal.getPercent_change_24h_str() + "%").replace('-', ' '));
+        holder.percentageTV.setText(modal.getPrice() == -1.0 ? " " : (modal.getPercent_change_24h_str() + "%").replace('-', ' '));
+//        holder.percentageTV.setText((modal.getPercent_change_24h_str() + "%").replace('-', ' '));
     }
 
     @Override

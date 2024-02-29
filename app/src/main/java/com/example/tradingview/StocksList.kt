@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -18,7 +17,7 @@ import org.json.JSONArray
 import java.util.Locale
 
 
-class MainActivity : ComponentActivity() {
+class StocksList : ComponentActivity() {
     private var currencyRV: RecyclerView? = null
     private var searchEdt: EditText? = null
     private var currencyModalArrayList: ArrayList<CurrencyModal>? = null
@@ -28,33 +27,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main) // Ensure you have activity_main.xml in your layout resources
-
-        val openStocksListButton: Button = findViewById(R.id.idOpenStocksList)
-        openStocksListButton.setOnClickListener {
-            val intent = Intent(this@MainActivity, StocksList::class.java)
-            startActivity(intent)
-        }
-
-        val content = SingletonFileManager.getInstance().readFile(this)
-
+        setContentView(R.layout.stockslist) // Ensure you have activity_main.xml in your layout resources
 
         searchEdt = findViewById(R.id.idEdtCurrency)
         loadingPB = findViewById(R.id.idPBLoading)
         currencyRV = findViewById(R.id.idRVcurrency)
         currencyModalArrayList = ArrayList()
-        currencyRVAdapter = CurrencyRVAdapter(
-            currencyModalArrayList, this
-        ) { position ->
-            val intent = Intent(this@MainActivity, StocksList::class.java)
-            // Optionally pass data to the new activity
-            intent.putExtra("currency_name", currencyModalArrayList!![position].name)
-            startActivity(intent)
-        }
+        currencyRVAdapter = CurrencyRVAdapter(currencyModalArrayList, this, object : CurrencyRVAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                val symbol = currencyModalArrayList!![position].symbol
+                // Assuming FileManager has been correctly instantiated and set up for Kotlin usage
+                SingletonFileManager.getInstance().appendToFile(applicationContext, symbol)
+                // Proceed with any other action you want to follow the click
+            }
+        })
         currencyRV?.layoutManager = LinearLayoutManager(this)
         currencyRV?.adapter = currencyRVAdapter
 
-//        populateList()
+        populateList()
 
         searchEdt?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -64,6 +54,7 @@ class MainActivity : ComponentActivity() {
             }
         })
     }
+
 
     private fun filter(text: String) {
         val filteredList = ArrayList<CurrencyModal>()
@@ -78,34 +69,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun populateList() {
-        apiAdapter.getSymbolsList(object : SymbolsListCallback {
-            override fun onSuccess(symbolsList: JSONArray) {
-                for (i in 0 until symbolsList.length()) {
-                    val item = symbolsList.getJSONObject(i)
-                    val symbol = item.getString("symbol")
-                    val name = item.getString("name")
-                    val price = 0.00 // Use empty string for price
-                    val percentChange24h = 0.00 // Use empty string for percent_change_24h
-
-                    currencyModalArrayList?.add(CurrencyModal(name, symbol, price, percentChange24h))
-                    if ((i + 1) % 10 == 0 || i == symbolsList.length() - 1) {
-                        currencyRVAdapter?.refresh()
-                    }
-                }
-            }
-
-            override fun onError(errorMessage: String) {
-                // Handle the error here, for example, print error message to console
-                System.err.println(errorMessage)
-            }
-        })
-    }
-}
-
-
-
-//    private fun getData() {
+    //    private fun getData() {
 //        val url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
 //
 //        val queue: RequestQueue = Volley.newRequestQueue(this)
@@ -145,3 +109,27 @@ class MainActivity : ComponentActivity() {
 //        }
 //        queue.add(jsonObjectRequest)
 //    }
+    private fun populateList() {
+        apiAdapter.getSymbolsList(object : SymbolsListCallback {
+            override fun onSuccess(symbolsList: JSONArray) {
+                for (i in 0 until symbolsList.length()) {
+                    val item = symbolsList.getJSONObject(i)
+                    val symbol = item.getString("symbol")
+                    val name = item.getString("name")
+                    val price = -1.0 // Use empty string for price
+                    val percentChange24h = -1.0 // Use empty string for percent_change_24h
+
+                    // Assuming currencyModalArrayList is a list of CurrencyModal objects
+                    // and CurrencyModal constructor matches the parameters order: name, symbol, price, percent_change_24h
+                    currencyModalArrayList?.add(CurrencyModal(name, symbol, price, percentChange24h))
+                }
+                currencyRVAdapter?.refresh()
+            }
+
+            override fun onError(errorMessage: String) {
+                // Handle the error here, for example, print error message to console
+                System.err.println(errorMessage)
+            }
+        })
+    }
+}
