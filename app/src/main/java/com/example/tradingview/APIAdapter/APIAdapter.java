@@ -22,8 +22,38 @@ public class APIAdapter {
         void onError(String errorMessage);
     }
 
+    public interface SymbolsDataCallback {
+        void onSuccess(JSONArray symbolsList);
+        void onError(String errorMessage);
+    }
+
     public void getSymbolsList(final SymbolsListCallback callback) {
         String url = "https://api.iex.cloud/v1/data/core/REF_DATA?token=sk_f88d90be0c5b4a0cba93ba7bbddc3791&filter=symbol,name";
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        // Use the callback to return the response
+                        callback.onSuccess(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // Use the callback to pass the error message
+                callback.onError("Failed to fetch data");
+                Toast.makeText(context, "Failed to fetch data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        queue.add(jsonArrayRequest);
+    }
+
+
+    public void getSymbolData(final SymbolsDataCallback callback){
+        String url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=IBM&apikey=ET7CN2ILLZU2FNW8";
 
         RequestQueue queue = Volley.newRequestQueue(context);
 
