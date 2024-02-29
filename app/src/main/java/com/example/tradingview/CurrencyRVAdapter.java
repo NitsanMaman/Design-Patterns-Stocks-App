@@ -41,6 +41,10 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
         refresh();
     }
 
+    public ArrayList<CurrencyModal> getCurrentList() {
+        return currencyModals;
+    }
+
     public void refresh() {
         notifyDataSetChanged();
     }

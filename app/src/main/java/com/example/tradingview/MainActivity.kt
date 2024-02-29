@@ -38,7 +38,6 @@ class MainActivity : ComponentActivity() {
 
         val content = SingletonFileManager.getInstance().readFile(this)
 
-
         searchEdt = findViewById(R.id.idEdtCurrency)
         loadingPB = findViewById(R.id.idPBLoading)
         currencyRV = findViewById(R.id.idRVcurrency)
@@ -88,6 +87,7 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "No currency found.", Toast.LENGTH_SHORT).show()
         else
             currencyRVAdapter?.filterList(filteredList)
+        currencyRVAdapter?.refresh()
     }
 
     private fun populateList() {

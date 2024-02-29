@@ -14,6 +14,7 @@ import com.example.tradingview.APIAdapter.APIAdapter
 import com.example.tradingview.APIAdapter.APIAdapter.SymbolsListCallback
 import com.example.tradingview.SingletonFileManager.SingletonFileManager
 import org.json.JSONArray
+import java.io.IOException
 import java.util.Locale
 
 
@@ -35,10 +36,15 @@ class StocksList : ComponentActivity() {
         currencyModalArrayList = ArrayList()
         currencyRVAdapter = CurrencyRVAdapter(this, currencyModalArrayList, object : CurrencyRVAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
-                val symbol = currencyModalArrayList!![position].symbol
-                // Assuming FileManager has been correctly instantiated and set up for Kotlin usage
-                SingletonFileManager.getInstance().appendToFile(applicationContext, symbol)
-                // Proceed with any other action you want to follow the click
+                // Fetch the symbol from the adapter's current dataset, which accounts for filtering
+                val symbol = currencyRVAdapter?.getCurrentList()?.get(position)?.symbol
+                // Use the symbol for further operations, like appending to a file
+                try {
+                    SingletonFileManager.getInstance().appendToFile(applicationContext, symbol)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    // Handle potential IOException, e.g., with a Toast
+                }
             }
         })
         currencyRV?.layoutManager = LinearLayoutManager(this)
@@ -84,6 +90,7 @@ private fun filter(text: String) {
         Toast.makeText(this, "No currency found.", Toast.LENGTH_SHORT).show()
     else
         currencyRVAdapter?.filterList(filteredList)
+    currencyRVAdapter?.refresh()
 }
 
 
