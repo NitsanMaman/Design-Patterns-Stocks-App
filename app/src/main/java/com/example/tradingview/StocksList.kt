@@ -1,6 +1,5 @@
 package com.example.tradingview
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -40,10 +39,13 @@ class StocksList : ComponentActivity() {
                 val symbol = currencyRVAdapter?.getCurrentList()?.get(position)?.symbol
                 // Use the symbol for further operations, like appending to a file
                 try {
-                    SingletonFileManager.getInstance().appendToFile(applicationContext, symbol)
+                    SingletonFileManager.getInstance().appendToFile(applicationContext, symbol ?: "")
+                    // Display a success message
+                    Toast.makeText(applicationContext, "$symbol added to the list", Toast.LENGTH_SHORT).show()
                 } catch (e: IOException) {
                     e.printStackTrace()
-                    // Handle potential IOException, e.g., with a Toast
+                    // Handle potential IOException, e.g., with a Toast for error
+                    Toast.makeText(applicationContext, "Failed to add $symbol to the list", Toast.LENGTH_SHORT).show()
                 }
             }
         })
@@ -140,6 +142,8 @@ private fun filter(text: String) {
                 for (i in 0 until symbolsList.length()) {
                     val item = symbolsList.getJSONObject(i)
                     val symbol = item.getString("symbol")
+                    if (symbol.contains('-') || symbol.contains('+') || symbol.contains('='))
+                        continue
                     val name = item.getString("name")
                     val price = -1.0 // Use empty string for price
                     val percentChange24h = -1.0 // Use empty string for percent_change_24h

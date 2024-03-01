@@ -36,8 +36,6 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
         }
 
-        val content = SingletonFileManager.getInstance().readFile(this)
-
         searchEdt = findViewById(R.id.idEdtCurrency)
         loadingPB = findViewById(R.id.idPBLoading)
         currencyRV = findViewById(R.id.idRVcurrency)
@@ -45,13 +43,15 @@ class MainActivity : ComponentActivity() {
         currencyRVAdapter = CurrencyRVAdapter(this, currencyModalArrayList, object : CurrencyRVAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 // Intent to start your GraphViewerActivity
+                // TODO: here should be the opening of the graph.
                 val intent = Intent(this@MainActivity, MainActivity::class.java)
                 startActivity(intent)
             }
         })
+        currencyRV?.layoutManager = LinearLayoutManager(this)
+        currencyRV?.adapter = currencyRVAdapter
 
-
-//        populateList()
+        populateList()
 
         searchEdt?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -90,29 +90,66 @@ class MainActivity : ComponentActivity() {
         currencyRVAdapter?.refresh()
     }
 
-    private fun populateList() {
-        apiAdapter.getSymbolsList(object : SymbolsListCallback {
-            override fun onSuccess(symbolsList: JSONArray) {
-                for (i in 0 until symbolsList.length()) {
-                    val item = symbolsList.getJSONObject(i)
-                    val symbol = item.getString("symbol")
-                    val name = item.getString("name")
-                    val price = 0.00 // Use empty string for price
-                    val percentChange24h = 0.00 // Use empty string for percent_change_24h
 
-                    currencyModalArrayList?.add(CurrencyModal(name, symbol, price, percentChange24h))
-                    if ((i + 1) % 10 == 0 || i == symbolsList.length() - 1) {
-                        currencyRVAdapter?.refresh()
+    private fun populateList() {
+        // Assuming SingletonFileManager.getInstance().readFile(context) returns JSONArray of symbols
+        val symbolsList = SingletonFileManager.getInstance().readFile(this)
+        for (i in 0 until symbolsList.length()) {
+            val symbol = symbolsList.getString(i) // Adjust based on your JSON structure
+            apiAdapter.getSymbolQuote(object : APIAdapter.SymbolsDataCallback {
+                override fun onSuccess(data: JSONArray) {
+                    val globalQuote = data.getJSONObject(0) // Adjust indexing based on your structure
+                    val price = globalQuote.getDouble("05. price")
+                    val percentChange = globalQuote.getString("10. change percent")
+
+                    // Assuming name is available or handled differently
+                    val name = "Name for $symbol" // Placeholder, adjust as necessary
+                    currencyModalArrayList?.add(CurrencyModal(name, symbol, price, percentChange.toDouble()))
+
+                    // Refresh adapter on UI thread, especially if this callback is asynchronous
+                    runOnUiThread {
+                        if ((i + 1) % 10 == 0 || i == symbolsList.length() - 1) {
+                            currencyRVAdapter?.refresh()
+                        }
                     }
                 }
-            }
 
-            override fun onError(errorMessage: String) {
-                // Handle the error here, for example, print error message to console
-                System.err.println(errorMessage)
-            }
-        })
+                override fun onError(errorMessage: String) {
+                    System.err.println(errorMessage)
+                }
+            }, symbol)
+        }
     }
+
+
+
+//    private fun populateList() {
+//        // Assuming SingletonFileManager.getInstance().readFile(context) returns JSONArray of symbols
+//        val symbolsList = SingletonFileManager.getInstance().readFile(this)
+//        for (i in 0 until symbolsList.length()) {
+//            val symbol = symbolsList.getString(i) // Adjust based on your JSON structure
+//            apiAdapter.getSymbolQuote(object : APIAdapter.SymbolsDataCallback {
+//                override fun onSuccess(data: JSONArray) {
+//                    val globalQuote = data.getJSONObject(0) // Adjust indexing based on your structure
+//                    val price = globalQuote.getDouble("05. price")
+//                    val percentChange = globalQuote.getString("10. change percent")
+//                    val percentChangeValue = percentChange.replace("%", "").toDoubleOrNull() ?: 0.0
+//                    val symbol = globalQuote.getString("01. symbol")
+//
+//                    // Assuming name is available or handled differently
+//                    val name = "Name for $symbol" // Placeholder, adjust as necessary
+//                    currencyModalArrayList?.add(CurrencyModal(name, symbol, price, percentChangeValue))
+//
+//                    // Refresh adapter on UI thread, especially if this callback is asynchronous
+//                    currencyRVAdapter?.refresh()
+//                }
+//
+//                override fun onError(errorMessage: String) {
+//                    System.err.println(errorMessage)
+//                }
+//            }, symbol)
+//        }
+//    }
 }
 
 
