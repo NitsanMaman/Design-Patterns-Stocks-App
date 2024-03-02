@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
         })
         currencyRV?.layoutManager = LinearLayoutManager(this)
         currencyRV?.adapter = currencyRVAdapter
-
+        currencyRVAdapter?.refresh()
         populateList()
 
         searchEdt?.addTextChangedListener(object : TextWatcher {
@@ -96,22 +96,18 @@ class MainActivity : ComponentActivity() {
         val symbolsList = SingletonFileManager.getInstance().readFile(this)
         for (i in 0 until symbolsList.length()) {
             val symbol = symbolsList.getString(i) // Adjust based on your JSON structure
+
             apiAdapter.getSymbolQuote(object : APIAdapter.SymbolsDataCallback {
                 override fun onSuccess(data: JSONArray) {
                     val globalQuote = data.getJSONObject(0) // Adjust indexing based on your structure
                     val price = globalQuote.getDouble("05. price")
-                    val percentChange = globalQuote.getString("10. change percent")
+                    val percentChange = globalQuote.getString("10. change percent").replace("%", "")
 
                     // Assuming name is available or handled differently
                     val name = "Name for $symbol" // Placeholder, adjust as necessary
                     currencyModalArrayList?.add(CurrencyModal(name, symbol, price, percentChange.toDouble()))
 
-                    // Refresh adapter on UI thread, especially if this callback is asynchronous
-                    runOnUiThread {
-                        if ((i + 1) % 10 == 0 || i == symbolsList.length() - 1) {
-                            currencyRVAdapter?.refresh()
-                        }
-                    }
+                    currencyRVAdapter?.refresh()
                 }
 
                 override fun onError(errorMessage: String) {
