@@ -12,7 +12,6 @@ import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tradingview.APIAdapter.APIAdapter
-import com.example.tradingview.APIAdapter.APIAdapter.SymbolsListCallback
 import com.example.tradingview.SingletonFileManager.SingletonFileManager
 import org.json.JSONArray
 import java.util.Locale
@@ -35,6 +34,9 @@ class MainActivity : ComponentActivity() {
             val intent = Intent(this@MainActivity, StocksList::class.java)
             startActivity(intent)
         }
+
+//        !!! this is only used for development and clearing the whole list !!!
+//        SingletonFileManager.getInstance().deleteFile(this)
 
         searchEdt = findViewById(R.id.idEdtCurrency)
         loadingPB = findViewById(R.id.idPBLoading)
@@ -61,6 +63,26 @@ class MainActivity : ComponentActivity() {
             }
         })
     }
+
+//    override fun onResume() {
+//        super.onResume()
+//        // Reload your list here
+//        populateList()
+//    }
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = getSharedPreferences("ListChangePrefs", MODE_PRIVATE)
+        val hasChanged = prefs.getBoolean("ListHasChanged", false)
+        if (hasChanged) {
+            populateList()
+            // Reset the flag
+            val editor = prefs.edit()
+            editor.putBoolean("ListHasChanged", false)
+            editor.apply()
+        }
+    }
+
 
     private fun filter(text: String) {
         val searchTextLowercase = text.lowercase(Locale.getDefault())

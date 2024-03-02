@@ -42,6 +42,11 @@ class StocksList : ComponentActivity() {
                     SingletonFileManager.getInstance().appendToFile(applicationContext, symbol ?: "")
                     // Display a success message
                     Toast.makeText(applicationContext, "$symbol added to the list", Toast.LENGTH_SHORT).show()
+                    // set a flag that detects if the list was changed
+                    val prefs = getSharedPreferences("ListChangePrefs", MODE_PRIVATE)
+                    val editor = prefs.edit()
+                    editor.putBoolean("ListHasChanged", true)
+                    editor.apply()
                 } catch (e: IOException) {
                     e.printStackTrace()
                     // Handle potential IOException, e.g., with a Toast for error
