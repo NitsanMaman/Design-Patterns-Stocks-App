@@ -2,6 +2,7 @@ package com.example.tradingview
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
@@ -25,6 +26,9 @@ class MainActivity : ComponentActivity() {
     private var currencyRVAdapter: CurrencyRVAdapter? = null
     private var loadingPB: ProgressBar? = null
     private var apiAdapter: APIAdapter = APIAdapter(this)
+
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +88,25 @@ class MainActivity : ComponentActivity() {
                 filter(s.toString())
             }
         })
+
+
+        handler = Handler()
+        runnable = Runnable {
+            populateList() // This method will be executed every 30 seconds
+            // Schedule the next execution
+            Toast.makeText(this, "starting timer.", Toast.LENGTH_SHORT).show()
+            handler.postDelayed(runnable, 30000)
+        }
+        // Start the timer
+        startTimer()
+    }
+
+    private fun startTimer() {
+        handler.postDelayed(runnable, 30000)
+    }
+
+    private fun stopTimer() {
+        handler.removeCallbacks(runnable)
     }
 
 //    override fun onResume() {
@@ -103,6 +126,8 @@ class MainActivity : ComponentActivity() {
             editor.putBoolean("ListHasChanged", false)
             editor.apply()
         }
+
+        startTimer()
     }
 
 
