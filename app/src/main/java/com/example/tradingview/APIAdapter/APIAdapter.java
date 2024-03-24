@@ -44,7 +44,8 @@ public class APIAdapter {
     }
 
     public void getSymbolsList(final SymbolsListCallback callback) {
-        String url = "REPLACE";
+        //String url = "https://api.iex.cloud/v1/data/core/REF_DATA?token=sk_f88d90be0c5b4a0cba93ba7bbddc3791&filter=symbol,name";
+        String url = "https://api.iex.cloud/v1/data/core/REF_DATA?token=sk_7d4f53920d5c4213a3b886812bbe3023&filter=symbol,name";
         RequestQueue queue = Volley.newRequestQueue(context);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
