@@ -15,4 +15,7 @@
     <color name="black_shade_3">#22252D</color>
     <color name="dark_blue_shade">#021853</color>
     <color name="yellow">#ffa500</color>
+
+    <color name="design_default_color_primary">#6200EE</color>
+    <color name="design_default_color_primary_dark">#3700B3</color>
 </resources>

@@ -21,6 +21,10 @@
             android:label="@string/StocksList"
             android:theme="@style/Theme.TradingView" />
         <activity
+            android:name=".GraphViewerActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TradingView" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

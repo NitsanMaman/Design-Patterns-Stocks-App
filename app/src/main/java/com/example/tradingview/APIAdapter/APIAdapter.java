@@ -38,8 +38,14 @@ public class APIAdapter {
         void onError(String errorMessage);
     }
 
+    public interface StockHistoryCallback {
+        void onSuccess(JSONObject historicalData);
+        void onError(String errorMessage);
+    }
+
     public void getSymbolsList(final SymbolsListCallback callback) {
-        String url = "https://api.iex.cloud/v1/data/core/REF_DATA?token=sk_f88d90be0c5b4a0cba93ba7bbddc3791&filter=symbol,name";
+        //String url = "https://api.iex.cloud/v1/data/core/REF_DATA?token=sk_f88d90be0c5b4a0cba93ba7bbddc3791&filter=symbol,name";
+        String url = "https://api.iex.cloud/v1/data/core/REF_DATA?token=sk_7d4f53920d5c4213a3b886812bbe3023&filter=symbol,name";
         RequestQueue queue = Volley.newRequestQueue(context);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
@@ -60,7 +66,9 @@ public class APIAdapter {
 
     public void getSymbolQuote(final SymbolsDataCallback callback, String symbol) {
 //        String url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=ET7CN2ILLZU2FNW8"; // Liors key
-        String url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=NIBOSC9JZJFNJG2M"; // Nitsans key
+        //String url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=NIBOSC9JZJFNJG2M"; // Nitsans key
+        //String url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=LFGC1VFXJG3G7W97"; // Rons key
+        String url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=ZF6LF0V4TACTJCAG"; // Nitsan2s key
         RequestQueue queue = Volley.newRequestQueue(context);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
@@ -80,4 +88,19 @@ public class APIAdapter {
 
         queue.add(jsonObjectRequest);
     }
+
+    public void getStockHistory(String symbol, final StockHistoryCallback callback) {
+        String url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=ZF6LF0V4TACTJCAG";
+        RequestQueue queue = Volley.newRequestQueue(context);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> callback.onSuccess(response),
+                error -> {
+                    callback.onError("Failed to fetch data");
+                    Toast.makeText(context, "Failed to fetch data", Toast.LENGTH_SHORT).show();
+                });
+        queue.add(jsonObjectRequest);
+    }
+
+
 }
+

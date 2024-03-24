@@ -15,6 +15,7 @@ import com.example.tradingview.APIAdapter.APIAdapter
 import com.example.tradingview.SingletonFileManager.SingletonFileManager
 import org.json.JSONArray
 import java.util.Locale
+import org.json.JSONObject
 
 
 class MainActivity : ComponentActivity() {
@@ -44,10 +45,25 @@ class MainActivity : ComponentActivity() {
         currencyModalArrayList = ArrayList()
         currencyRVAdapter = CurrencyRVAdapter(this, currencyModalArrayList, object : CurrencyRVAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
-                // Intent to start your GraphViewerActivity
-                // TODO: here should be the opening of the graph.
-                val intent = Intent(this@MainActivity, MainActivity::class.java)
-                startActivity(intent)
+                currencyModalArrayList?.get(position)?.let { currencyModal ->
+                    apiAdapter.getStockHistory(currencyModal.symbol, object : APIAdapter.StockHistoryCallback {
+                        override fun onSuccess(historicalData: JSONObject) {
+                            // Convert JSONObject to String
+                            val historicalDataString = historicalData.toString()
+
+                            // Launch GraphViewerActivity with the historical data
+                            val intent = Intent(this@MainActivity, GraphViewerActivity::class.java).apply {
+                                putExtra("historicalData", historicalDataString)
+                            }
+                            startActivity(intent)
+                        }
+
+                        override fun onError(errorMessage: String) {
+                            // Handle error, possibly show a toast or log
+                            Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                }
             }
         })
         currencyRV?.layoutManager = LinearLayoutManager(this)
