@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Use Material Components theme as the base for Theme.TradingView. -->
+    <style name="Theme.TradingView" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+    </style>
 
-    <style name="Theme.TradingView" parent="android:Theme.Material.Light.NoActionBar" />
-  <!-- Base application theme. -->
+    <!-- You can keep your Base.Theme.TradingView as is if it's used differently and doesn't cause issues. -->
     <style name="Base.Theme.TradingView" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 </resources>

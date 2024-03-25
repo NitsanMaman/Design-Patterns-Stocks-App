@@ -48,14 +48,20 @@ class MainActivity : ComponentActivity() {
                 currencyModalArrayList?.get(position)?.let { currencyModal ->
                     apiAdapter.getStockHistory(currencyModal.symbol, object : APIAdapter.StockHistoryCallback {
                         override fun onSuccess(historicalData: JSONObject) {
-                            // Convert JSONObject to String
-                            val historicalDataString = historicalData.toString()
+                            try {
+                                // Convert JSONObject to String
+                                val historicalDataString = historicalData.toString()
 
-                            // Launch GraphViewerActivity with the historical data
-                            val intent = Intent(this@MainActivity, GraphViewerActivity::class.java).apply {
-                                putExtra("historicalData", historicalDataString)
+                                // Launch GraphViewerActivity with the historical data
+                                val intent = Intent(this@MainActivity, GraphViewerActivity::class.java).apply {
+                                    putExtra("historicalData", historicalDataString)
+                                }
+                                startActivity(intent)
+                            } catch (e: Exception) {
+                                // Catch any exception that occurs during processing and display it
+                                e.printStackTrace()
+                                Toast.makeText(this@MainActivity, "Error processing data: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
-                            startActivity(intent)
                         }
 
                         override fun onError(errorMessage: String) {
