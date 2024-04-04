@@ -19,7 +19,6 @@ import java.util.ArrayList;
 public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.CurrencyViewholder> {
     private static DecimalFormat df2 = new DecimalFormat("#.##");
     private ArrayList<CurrencyModal> currencyModals;
-    private ArrayList<CurrencyModal> currencyModalsFull;
     private Context context;
 
     private OnItemClickListener listener;
@@ -31,7 +30,6 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
     public CurrencyRVAdapter(Context context, ArrayList<CurrencyModal> currencyModals, OnItemClickListener listener) {
         this.context = context;
         this.currencyModals = currencyModals;
-        this.currencyModalsFull = new ArrayList<>(currencyModals);
         this.listener = listener;
     }
 
@@ -52,7 +50,7 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
     @NonNull
     @Override
     public CurrencyRVAdapter.CurrencyViewholder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // this method is use to inflate the layout file
+        // this method is used to inflate the layout file
         // which we have created for our recycler view.
         // on below line we are inflating our layout file.
         View view = LayoutInflater.from(context).inflate(R.layout.currency_rv_item, parent, false);
@@ -75,6 +73,14 @@ public class CurrencyRVAdapter extends RecyclerView.Adapter<CurrencyRVAdapter.Cu
 //        holder.percentageTV.setText((modal.getPercent_change_24h_str() + "%").replace('-', ' '));
     }
 
+
+    public void clear(){
+//        for (CurrencyModal modal: currencyModals ) {
+//            currencyModals.remove(modal);
+//        }
+        currencyModals.clear();
+        refresh();
+    }
     @Override
     public int getItemCount() {
         // on below line we are returning

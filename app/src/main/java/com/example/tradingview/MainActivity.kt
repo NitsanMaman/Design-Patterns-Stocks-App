@@ -90,6 +90,8 @@ class MainActivity : ComponentActivity() {
         })
 
 
+        // TODO: fix the timer duplicating the list stocks
+
         handler = Handler()
         runnable = Runnable {
             populateList() // This method will be executed every 30 seconds
@@ -161,6 +163,8 @@ class MainActivity : ComponentActivity() {
 
 
     private fun populateList() {
+//        currencyRVAdapter?.clear();
+        currencyModalArrayList?.clear();
         // Assuming SingletonFileManager.getInstance().readFile(context) returns JSONArray of symbols
         val symbolsList = SingletonFileManager.getInstance().readFile(this)
         for (i in 0 until symbolsList.length()) {
